@@ -16,7 +16,7 @@ RUN adduser \
     --uid "${UID}" \    
     "${USER}"
 
-FROM alpine
+FROM scratch
 
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=builder /etc/passwd /etc/passwd
