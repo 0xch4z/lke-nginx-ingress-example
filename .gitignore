@@ -1,0 +1,4 @@
+cmd/greeter/greeter
+k8s/.config
+deploy/.terraform
+deploy/*.tfstate*

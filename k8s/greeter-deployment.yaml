@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: greeter
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: hello-kube
+  template:
+    metadata:
+      labels:
+        app: hello-kube
+    spec:
+      containers:
+      - name: greeter
+        image: docker.io/charliekenney23/hello-kube-greeter:latest
+        resources:
+          limits:
+            memory: 128Mi
+            cpu: "500m"
+        ports:
+        - containerPort: 8080
