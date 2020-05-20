@@ -13,11 +13,11 @@ resource "linode_lke_cluster" "cluster" {
 # The kubeconfig will be decoded and written to the k8s
 # directory when updated.
 resource "null_resource" "kubeconfig_fetch" {
+    triggers = {
+        kubeconfig = linode_lke_cluster.cluster.kubeconfig
+    }
+    
     provisioner "local-exec" {
-        triggers {
-            kubeconfig = linode_lke_cluster.cluster.kubeconfig
-        }
-
         command = "mkdir -p ../k8s/.config && echo '${base64decode(linode_lke_cluster.cluster.kubeconfig)}' > ../k8s/.config/kubeconfig.yaml"
     }
 }

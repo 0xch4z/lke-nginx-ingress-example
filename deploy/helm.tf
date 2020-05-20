@@ -12,3 +12,18 @@ resource "helm_release" "nginx-ingress-release" {
     null_resource.kubeconfig_fetch
   ]
 }
+
+resource "helm_release" "cert-manager-release" {
+  name       = "cert-manager"
+  repository = "https://charts.jetstack.io"
+  chart      = "cert-manager"
+
+  set {
+    name  = "installCRDs"
+    value = "true"
+  }
+
+  depends_on = [
+    null_resource.kubeconfig_fetch
+  ]
+}
