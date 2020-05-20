@@ -6,15 +6,16 @@ GO_BUILD          := $(GO_BUILD_ARGS) go build $(GO_BUILD_LD_FLAGS)
 DOCKER_PROJECT_NAMESPACE := charliekenney23/hello-kube
 
 CMD_DIR    := ./cmd
-K8S_DIR    := ./k8s
+HACK_DIR   := ./hack
 DEPLOY_DIR := ./deploy
 
 GREETER_MAIN_PKG    := $(CMD_DIR)/greeter
 GREETER_ENTRY_POINT := $(GREETER_MAIN_PKG)/main.go
 GREETER_BIN         := $(GREETER_MAIN_PKG)/greeter
 
-KUBECONFIG_PATH := $(K8S_DIR)/.config/kubeconfig.yaml
-KUBECTL_FLAGS   := --kubeconfig=$(KUBECONFIG_PATH)
+K8S_APPLY_SCRIPT := $(HACK_DIR)/k8s_apply.sh
+
+build: deps fmt test go-build docker-build
 
 fmt:
 	go fmt ./...
@@ -35,16 +36,15 @@ go-build: greeter-build
 docker-build:
 	(cd $(GREETER_MAIN_PKG) && docker build -t $(DOCKER_PROJECT_NAMESPACE)-greeter .)
 
-build: deps fmt test go-build docker-build
-
 docker-push:
-	docker image ls | grep charliekenney23/hello-kube | grep latest | awk '{print $$1}' | xargs docker push
+	docker image ls | grep $(DOCKER_PROJECT_NAMESPACE) | grep latest | awk '{print $$1}' | xargs docker push
 
 k8s-apply:
-	kubectl $(KUBECTL_FLAGS) apply -f $(K8S_DIR)
-	kubectl $(KUBECTL_FLAGS) get services
+	bash $(K8S_APPLY_SCRIPT)
 
 deploy-cluster:
-	(cd deploy; terraform init && terraform apply)
-	kubectl $(KUBECTL_FLAGS) apply -f $(K8S_DIR)
-	kubectl $(KUBECTL_FLAGS) get services
+	(cd $(DEPLOY_DIR); terraform init && terraform apply)
+	bash $(K8S_APPLY_SCRIPT)
+
+destroy-cluster:
+	(cd $(DEPLOY_DIR); terraform destroy)
